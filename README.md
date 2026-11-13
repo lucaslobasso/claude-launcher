@@ -70,11 +70,11 @@ Other installer options: `-ShortcutName "Claude Code"` (shortcut name), `-NoDesk
 ## How it works
 
 ```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 400}}}%%
 flowchart LR
-    A["Claude shortcut<br/>(own taskbar ID)"] --> B["ClaudeLauncher.exe"]
-    B -- "wt -w new -p Claude" --> C["Windows Terminal window"]
-    B -. "labels the window as it's created:<br/>taskbar ID + Claude icon" .-> C
-    C --> D["claude-launch.ps1<br/>loading screen, folder trust"]
+    A["Claude shortcut"] --> B["ClaudeLauncher.exe"]
+    B --> C["Terminal window<br/>with Claude's icon"]
+    C --> D["claude-launch.ps1<br/>loading screen"]
     D --> E["claude agents"]
 ```
 
