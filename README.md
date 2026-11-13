@@ -9,7 +9,7 @@ A one-click **Claude** shortcut for Windows that opens [Claude Code](https://cod
 - **A setting for the folder** it opens in, and for the Claude command it runs (agent view by default).
 
 <p align="center">
-  <img src="docs/loading.gif" alt="Windows Terminal window titled Claude showing an orange 'Starting Claude' with animated dots" width="660">
+  <img src="docs/loading.gif" alt="Windows Terminal window titled Claude showing an orange 'Starting Claude' with animated dots" width="760">
 </p>
 
 <p align="center">
