@@ -2,6 +2,7 @@
 // It starts `wt.exe -w new -p <profile>`, watches for the new Terminal window being created and labels it
 // (own AppUserModelID + claude.exe icon) before it is shown, so no Terminal button flashes on the taskbar.
 // Usage: ClaudeLauncher.exe [Terminal profile name, default "Claude"]. Built and installed by install.ps1.
+// The profile name is also the name the taskbar shows for the window.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +12,7 @@ using System.Text;
 
 static class ClaudeLauncher
 {
-    const string Aumid = "ClaudeLauncher.WindowsTerminal"; // keep in sync with install.ps1
+    const string Aumid = "ClaudeLauncher.WindowsTerminal"; // keep in sync with $LauncherAumid in src/common.ps1
     const string TerminalClass = "CASCADIA_HOSTING_WINDOW_CLASS";
     const uint EVENT_OBJECT_CREATE = 0x8000, EVENT_OBJECT_SHOW = 0x8002;
     const uint WINEVENT_OUTOFCONTEXT = 0, WINEVENT_SKIPOWNPROCESS = 2;
@@ -19,9 +20,8 @@ static class ClaudeLauncher
     const int TimeoutMs = 10000;
 
     static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-    static readonly string ClaudeExe = Path.Combine(Home, @".local\bin\claude.exe");
     static readonly string SelfExe = Process.GetCurrentProcess().MainModule.FileName;
-    static string IconFile; // claude.exe when installed in the usual place, otherwise this launcher
+    static string IconFile; // claude.exe when found, otherwise this launcher (it has an icon of its own)
     static string Profile = "Claude";
 
     static readonly HashSet<IntPtr> existing = new HashSet<IntPtr>();
@@ -34,7 +34,7 @@ static class ClaudeLauncher
     static int Main(string[] args)
     {
         if (args.Length > 0 && args[0].Trim().Length > 0) Profile = args[0].Trim();
-        IconFile = File.Exists(ClaudeExe) ? ClaudeExe : SelfExe;
+        IconFile = FindExe(Path.Combine(Home, @".local\bin\claude.exe"), "claude.exe") ?? SelfExe;
         log = new Log(Path.Combine(Path.GetDirectoryName(SelfExe), "ClaudeLauncher.log"));
         mainThread = GetCurrentThreadId();
 
@@ -45,14 +45,19 @@ static class ClaudeLauncher
         IntPtr hook = SetWinEventHook(EVENT_OBJECT_CREATE, EVENT_OBJECT_SHOW, IntPtr.Zero, callback, 0, 0,
             WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS);
 
-        string wt = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Microsoft\WindowsApps\wt.exe");
+        string wt = FindExe(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Microsoft\WindowsApps\wt.exe"), "wt.exe");
         try
         {
+            if (wt == null) throw new FileNotFoundException("wt.exe is not in WindowsApps or on PATH");
             Process.Start(new ProcessStartInfo(wt, "-w new -p \"" + Profile + "\"") { UseShellExecute = true, WorkingDirectory = Home });
         }
         catch (Exception e)
         {
             log.Write("failed to start wt: " + e.Message);
+            MessageBox(IntPtr.Zero,
+                "Couldn't start Windows Terminal (" + e.Message + ").\n\nInstall Windows Terminal from the Microsoft Store, " +
+                "or turn its app execution alias back on in Settings > Apps > Advanced app settings > App execution aliases.",
+                "Claude Launcher", 0x10); // MB_ICONERROR
             return 1;
         }
 
@@ -98,7 +103,7 @@ static class ClaudeLauncher
             {
                 SetString(store, 5, Aumid);                      // System.AppUserModel.ID
                 SetString(store, 2, "\"" + SelfExe + "\" \"" + Profile + "\""); // RelaunchCommand
-                SetString(store, 4, "Claude");                   // RelaunchDisplayNameResource
+                SetString(store, 4, Profile);                    // RelaunchDisplayNameResource
                 SetString(store, 3, IconFile + ",0");            // RelaunchIconResource
             }
             finally { Marshal.ReleaseComObject(store); }
@@ -114,6 +119,22 @@ static class ClaudeLauncher
         ExtractIconEx(IconFile, 0, out large, out small, 1);
         if (large != IntPtr.Zero) SendMessage(hwnd, WM_SETICON, (IntPtr)1, large);
         if (small != IntPtr.Zero) SendMessage(hwnd, WM_SETICON, (IntPtr)0, small);
+    }
+
+    // The first path that exists, else the first `name` found on PATH, else null.
+    static string FindExe(string path, string name)
+    {
+        if (File.Exists(path)) return path;
+        foreach (string dir in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'))
+        {
+            try
+            {
+                string candidate = Path.Combine(dir.Trim().Trim('"'), name);
+                if (dir.Trim().Length > 0 && File.Exists(candidate)) return candidate;
+            }
+            catch (ArgumentException) { } // a malformed PATH entry
+        }
+        return null;
     }
 
     static string ClassOf(IntPtr hwnd)
@@ -188,4 +209,5 @@ static class ClaudeLauncher
     [DllImport("shell32.dll")] static extern int SHGetPropertyStoreForWindow(IntPtr hwnd, ref Guid riid, out IPropertyStore store);
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)] static extern uint ExtractIconEx(string file, int index, out IntPtr large, out IntPtr small, uint count);
     [DllImport("ole32.dll")] static extern int PropVariantClear(ref PROPVARIANT value);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int MessageBox(IntPtr hwnd, string text, string caption, uint type);
 }

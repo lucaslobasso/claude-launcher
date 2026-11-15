@@ -1,7 +1,7 @@
 # Shared by install.ps1 / uninstall.ps1: shortcut helpers, including the taskbar ID (AppUserModelID) that lets a
 # pinned shortcut share one taskbar button with the window ClaudeLauncher.exe labels.
 
-$LauncherAumid = 'ClaudeLauncher.WindowsTerminal'  # keep in sync with src/ClaudeLauncher.cs
+$LauncherAumid = 'ClaudeLauncher.WindowsTerminal'  # keep in sync with Aumid in src/ClaudeLauncher.cs
 
 if (-not ('ClaudeLauncherShortcut' -as [type])) {
     Add-Type -TypeDefinition @'
@@ -68,10 +68,11 @@ public static class ClaudeLauncherShortcut
 
 function Set-ShortcutAumid([string]$Path, [string]$Aumid) { [ClaudeLauncherShortcut]::SetAumid($Path, $Aumid) }
 
-function New-LauncherShortcut([string]$Path, [string]$Target, [string]$Icon) {
+function New-LauncherShortcut([string]$Path, [string]$Target, [string]$Arguments, [string]$Icon) {
     $shell = New-Object -ComObject WScript.Shell
     $l = $shell.CreateShortcut($Path)
     $l.TargetPath = $Target
+    $l.Arguments = $Arguments
     $l.WorkingDirectory = $env:USERPROFILE
     $l.IconLocation = $Icon
     $l.Description = 'Claude Code in Windows Terminal'
