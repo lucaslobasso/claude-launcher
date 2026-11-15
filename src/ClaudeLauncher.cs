@@ -1,8 +1,8 @@
 // ClaudeLauncher.exe: opens Claude Code in Windows Terminal with Claude's own taskbar icon and button.
 // It starts `wt.exe -w new -p <profile GUID>`, watches for the new Terminal window being created and labels it
 // (own AppUserModelID + claude.exe icon) before it is shown, so no Terminal button flashes on the taskbar.
-// Usage: ClaudeLauncher.exe [name for the taskbar button, default "Claude"]. Built and installed by install.ps1,
-// which passes the Terminal profile's name (-ShortcutName).
+// Usage: ClaudeLauncher.exe [name for the taskbar button, default "Claude"]. It always opens the launcher's own profile
+// (by GUID). Built and installed by install.ps1; the shortcuts pass -ShortcutName as the name.
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
