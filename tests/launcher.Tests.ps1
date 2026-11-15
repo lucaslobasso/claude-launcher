@@ -54,6 +54,48 @@ Describe 'Read-LauncherSettings' {
     }
 }
 
+Describe 'Update-TerminalProfileEntries' {
+    BeforeAll {
+        $guid = $LauncherProfileGuid
+        function New-WtSettings([bool]$Elevate, [object[]]$List) {
+            @{ profiles = @{ defaults = @{ elevate = $Elevate }; list = $List } }
+        }
+    }
+
+    It 'keeps the GUID in sync with ClaudeLauncher.cs' {
+        Get-Content -Raw (Join-Path $PSScriptRoot '..\src\ClaudeLauncher.cs') | Should -Match ([regex]::Escape("ProfileGuid = `"$guid`""))
+    }
+    It 'adds "elevate": false when every profile runs as admin' {
+        $s = New-WtSettings $true @(@{ guid = '{other}'; name = 'PowerShell' })
+        Update-TerminalProfileEntries $s $guid 'Claude' | Should -BeTrue
+        $mine = $s.profiles.list | Where-Object { $_.guid -eq $guid }
+        $mine.elevate | Should -BeFalse
+        $s.profiles.list.Count | Should -Be 2
+    }
+    It 'fixes an existing entry: elevate, and a name from an earlier -ShortcutName' {
+        $s = New-WtSettings $true @(@{ guid = $guid; source = 'ClaudeLauncher'; name = 'Claude' })
+        Update-TerminalProfileEntries $s $guid 'Claude (launcher)' | Should -BeTrue
+        $s.profiles.list[0].elevate | Should -BeFalse
+        $s.profiles.list[0].name | Should -Be 'Claude (launcher)'
+    }
+    It 'drops entries left from the profile under another GUID' {
+        $s = New-WtSettings $false @(
+            @{ guid = '{old}'; source = 'ClaudeLauncher'; name = 'Claude (launcher)' },
+            @{ guid = '{other}'; name = 'PowerShell' })
+        Update-TerminalProfileEntries $s $guid 'Claude (launcher)' | Should -BeTrue
+        @($s.profiles.list).Count | Should -Be 1
+        $s.profiles.list[0].guid | Should -Be '{other}'
+    }
+    It 'changes nothing when nothing overrides the fragment' {
+        $s = New-WtSettings $false @(@{ guid = $guid; source = 'ClaudeLauncher'; name = 'Claude'; hidden = $false })
+        Update-TerminalProfileEntries $s $guid 'Claude' | Should -BeFalse
+        $s.profiles.list[0].Contains('elevate') | Should -BeFalse
+    }
+    It 'leaves the old array form of "profiles" alone' {
+        Update-TerminalProfileEntries @{ profiles = @(@{ name = 'x' }) } $guid 'Claude' | Should -BeFalse
+    }
+}
+
 Describe 'Find-Tool' {
     It 'prefers an existing path' {
         $f = Join-Path $TestDrive 'tool.exe'; Set-Content $f ''

@@ -1,8 +1,8 @@
 // ClaudeLauncher.exe: opens Claude Code in Windows Terminal with Claude's own taskbar icon and button.
-// It starts `wt.exe -w new -p <profile>`, watches for the new Terminal window being created and labels it
+// It starts `wt.exe -w new -p <profile GUID>`, watches for the new Terminal window being created and labels it
 // (own AppUserModelID + claude.exe icon) before it is shown, so no Terminal button flashes on the taskbar.
-// Usage: ClaudeLauncher.exe [Terminal profile name, default "Claude"]. Built and installed by install.ps1.
-// The profile name is also the name the taskbar shows for the window.
+// Usage: ClaudeLauncher.exe [name for the taskbar button, default "Claude"]. Built and installed by install.ps1,
+// which passes the Terminal profile's name (-ShortcutName).
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,7 +22,8 @@ static class ClaudeLauncher
     static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     static readonly string SelfExe = Process.GetCurrentProcess().MainModule.FileName;
     static string IconFile; // claude.exe when found, otherwise this launcher (it has an icon of its own)
-    static string Profile = "Claude";
+    const string ProfileGuid = "{4d0d2583-2c71-5809-98e7-a26fa8ae2100}"; // keep in sync with $LauncherProfileGuid in src/launcher-lib.ps1
+    static string Profile = "Claude"; // the name shown on the taskbar button
 
     static readonly HashSet<IntPtr> existing = new HashSet<IntPtr>();
     static IntPtr target = IntPtr.Zero;
@@ -49,7 +50,8 @@ static class ClaudeLauncher
         try
         {
             if (wt == null) throw new FileNotFoundException("wt.exe is not in WindowsApps or on PATH");
-            Process.Start(new ProcessStartInfo(wt, "-w new -p \"" + Profile + "\"") { UseShellExecute = true, WorkingDirectory = Home });
+            // By GUID, not name: a run without arguments (or with an old name) still gets the launcher profile.
+            Process.Start(new ProcessStartInfo(wt, "-w new -p \"" + ProfileGuid + "\"") { UseShellExecute = true, WorkingDirectory = Home });
         }
         catch (Exception e)
         {

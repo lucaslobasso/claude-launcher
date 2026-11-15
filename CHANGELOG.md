@@ -2,6 +2,13 @@
 
 All notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-11-15
+
+### Fixed
+- Re-installing with a different `-ShortcutName` no longer makes Claude open as admin with Terminal's icon. Renaming used to create a new Terminal profile, which lost the `"elevate": false` that overrides a Terminal set to run every profile as admin. The profile now has a fixed GUID, and the installer adds `"elevate": false` to Terminal's `settings.json` when `profiles.defaults` says `"elevate": true`. A backup is kept as `settings.json.bak-launcher`.
+- `ClaudeLauncher.exe` run with no arguments (e.g. by another tool) opens the launcher profile again, instead of Terminal's default shell. It now picks the profile by GUID, not by name.
+- Profile entries that Terminal kept for an older name are removed, so they no longer show up as dead profiles.
+
 ## [1.1.0] - 2026-11-15
 
 ### Added
