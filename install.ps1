@@ -87,11 +87,12 @@ $exe = Join-Path $InstallDir 'ClaudeLauncher.exe'
 & $csc -nologo -target:winexe -platform:anycpu "-win32icon:$(Join-Path $PSScriptRoot 'assets\claude-launcher.ico')" "-out:$exe" (Join-Path $PSScriptRoot 'src\ClaudeLauncher.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Building ClaudeLauncher.exe failed (see the errors above). Close any running Claude Launcher window and try again.' }
 
-# ---- Windows Terminal profile (a fragment, so your Terminal settings.json is never edited) ----
+# ---- Windows Terminal profile (a fragment, with a fixed GUID so renaming it keeps it the same profile) ----
 $icon = if ($claude -and $claude -like '*.exe') { $claude } else { $exe }
 $fragmentDir = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows Terminal\Fragments\ClaudeLauncher'
 New-Item -ItemType Directory -Force $fragmentDir | Out-Null
 $profile_ = [ordered]@{
+    guid              = $LauncherProfileGuid
     name              = $ShortcutName
     commandline       = "`"$pwsh`" -NoLogo -NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $InstallDir 'claude-launch.ps1')`""
     startingDirectory = '%USERPROFILE%'
@@ -101,6 +102,20 @@ $profile_ = [ordered]@{
 }
 $fragment = @{ profiles = @($profile_) } | ConvertTo-Json -Depth 5
 [IO.File]::WriteAllText((Join-Path $fragmentDir 'claude.json'), $fragment + "`n", [Text.UTF8Encoding]::new($false))
+
+# Terminal's settings.json is only touched when its own entry for the profile would override the fragment
+# (e.g. "elevate": true for all profiles); see Update-TerminalProfileEntries. A backup is kept next to it.
+foreach ($wtSettings in Get-TerminalSettingsFiles) {
+    try {
+        $wtJson = Get-Content -Raw -Encoding utf8 $wtSettings | ConvertFrom-Json -AsHashtable
+        if (Update-TerminalProfileEntries $wtJson $LauncherProfileGuid $ShortcutName) {
+            Copy-Item $wtSettings "$wtSettings.bak-launcher" -Force
+            [IO.File]::WriteAllText($wtSettings, ($wtJson | ConvertTo-Json -Depth 64) + "`n", [Text.UTF8Encoding]::new($false))
+            Write-Host "Updated the '$ShortcutName' profile in $wtSettings (backup: settings.json.bak-launcher)"
+        }
+    }
+    catch { Write-Warning "Couldn't check $wtSettings ($($_.Exception.Message)). If Claude opens as admin, set `"elevate`": false on the '$ShortcutName' profile." }
+}
 
 # ---- Shortcuts ----
 $places = @(Join-Path ([Environment]::GetFolderPath('Programs')) "$ShortcutName.lnk")
