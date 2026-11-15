@@ -1,11 +1,12 @@
-# claude-launch.ps1: runs inside the Windows Terminal "Claude" profile.
+#Requires -Version 7
+# claude-launch.ps1: runs inside the Windows Terminal profile install.ps1 creates.
 # Shows an orange loading animation, pre-accepts the folder trust prompt, then starts Claude Code.
-# Installed by install.ps1.
 #
 # Settings live in launcher.json next to this script (written by install.ps1, safe to edit by hand):
-#   { "folder": "C:\\Users\\you\\projects", "claudeArgs": "agents" }
-#   folder      folder Claude opens in (default: your user folder); "%USERPROFILE%"-style variables work
-#   claudeArgs  arguments for claude.exe (default: "agents", the agent view)
+#   { "folder": "%USERPROFILE%", "claudeArgs": "agents", "keepShellOpen": false }
+#   folder         folder Claude opens in; "%USERPROFILE%"-style variables work
+#   claudeArgs     arguments for claude ("" = a plain `claude` session); "double quotes" group words
+#   keepShellOpen  true: when Claude exits, stay in a PowerShell prompt in that folder instead of closing the tab
 # Parameters override the file for one run:
 #   -Folder, -ClaudeArgs   as above
 #   -Demo <s>              only show the loading animation for <s> seconds, don't start Claude (screenshots/testing)
@@ -17,17 +18,20 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'launcher-lib.ps1')
 
-$settings = @{}
-$settingsFile = Join-Path $PSScriptRoot 'launcher.json'
-if (Test-Path $settingsFile) {
-    try { $settings = Get-Content -Raw -Encoding utf8 $settingsFile | ConvertFrom-Json -AsHashtable }
-    catch { Write-Host "Launcher: couldn't read launcher.json ($($_.Exception.Message)); using defaults." -ForegroundColor Yellow }
+function Stop-WithMessage([string]$Text) {
+    [Console]::Write("`e[2J`e[H`e[?25h")
+    Write-Host "Claude Launcher: $Text" -ForegroundColor Yellow
+    Read-Host 'Press Enter to close'
+    exit 1
 }
-if (-not $Folder) { $Folder = if ($settings['folder']) { [Environment]::ExpandEnvironmentVariables($settings['folder']) } else { $env:USERPROFILE } }
-if (-not $ClaudeArgs) { $ClaudeArgs = if ($settings['claudeArgs']) { $settings['claudeArgs'] } else { 'agents' } }
-if (-not (Test-Path -PathType Container $Folder)) {
-    Write-Host "Launcher: folder '$Folder' not found; opening in your user folder instead." -ForegroundColor Yellow
+
+$settings = Read-LauncherSettings (Join-Path $PSScriptRoot 'launcher.json')
+if (-not $PSBoundParameters.ContainsKey('Folder')) { $Folder = [Environment]::ExpandEnvironmentVariables([string]$settings.folder) }
+if (-not $PSBoundParameters.ContainsKey('ClaudeArgs')) { $ClaudeArgs = [string]$settings.claudeArgs }
+if (-not $Folder -or -not (Test-Path -PathType Container $Folder)) {
+    Write-Host "Claude Launcher: folder '$Folder' not found; opening in your user folder instead." -ForegroundColor Yellow
     $Folder = $env:USERPROFILE
 }
 Set-Location $Folder
@@ -76,45 +80,44 @@ Get-ChildItem env: |
     Where-Object { -not $userEnv.Contains($_.Name) -and -not $machineEnv.Contains($_.Name) } |
     ForEach-Object { Remove-Item "env:$($_.Name)" }
 
-# ---- Pre-accept the trust prompt: Claude Code doesn't remember trust for your user folder ----
+# ---- Pre-accept the trust prompt for the configured folder (Claude Code doesn't remember it for your user folder) ----
+# Only written when the entry is missing; dates are kept as text so the rest of the file round-trips unchanged.
 $config = Join-Path $env:USERPROFILE '.claude.json'
 $projectKey = (Resolve-Path $Folder).Path.TrimEnd('\') -replace '\\', '/'
 try {
     if (Test-Path $config) {
-        $data = Get-Content -Raw -Encoding utf8 $config | ConvertFrom-Json -AsHashtable
+        $raw = Get-Content -Raw -Encoding utf8 $config
+        $data = if ($PSVersionTable.PSVersion -ge [version]'7.5') { $raw | ConvertFrom-Json -AsHashtable -DateKind String } else { $raw | ConvertFrom-Json -AsHashtable }
         if ($null -eq $data['projects']) { $data['projects'] = [ordered]@{} }
         $proj = $data['projects'][$projectKey]
-        if ($null -eq $proj) {
-            $proj = [ordered]@{}
-            $data['projects'][$projectKey] = $proj
-        }
-        if ($proj['hasTrustDialogAccepted'] -ne $true) {
+        if ($null -eq $proj -or $proj['hasTrustDialogAccepted'] -ne $true) {
+            if ($null -eq $proj) { $proj = [ordered]@{}; $data['projects'][$projectKey] = $proj }
             $proj['hasTrustDialogAccepted'] = $true
-            $json = $data | ConvertTo-Json -Depth 100
             $tmp = "$config.launcher-tmp"
-            [IO.File]::WriteAllText($tmp, $json, [Text.UTF8Encoding]::new($false))
+            [IO.File]::WriteAllText($tmp, ($data | ConvertTo-Json -Depth 100), [Text.UTF8Encoding]::new($false))
             Move-Item -Force $tmp $config
         }
     }
 }
 catch {
-    Write-Host "Launcher: couldn't pre-trust the folder ($($_.Exception.Message)). You may see the trust prompt." -ForegroundColor Yellow
+    Write-Host "Claude Launcher: couldn't pre-trust the folder ($($_.Exception.Message)). You may see the trust prompt." -ForegroundColor Yellow
 }
 
 # ---- Start Claude; the animation keeps going until Claude starts drawing ----
-$claude = Join-Path $env:USERPROFILE '.local\bin\claude.exe'
-if (-not (Test-Path $claude)) { $claude = (Get-Command claude -ErrorAction SilentlyContinue).Source }
+$claude = Find-Claude
 if (-not $claude) {
     $spinner.Run = $false
-    [Console]::Write("`e[2J`e[H`e[?25h")
-    Write-Host "Launcher: claude.exe not found. Install Claude Code: https://code.claude.com/docs" -ForegroundColor Yellow
-    return
+    Stop-WithMessage 'claude was not found (looked in %USERPROFILE%\.local\bin and on PATH). Install Claude Code: https://code.claude.com/docs'
 }
 
 try {
-    & $claude @($ClaudeArgs -split '\s+' | Where-Object { $_ })
+    & $claude @(Split-ClaudeArgs $ClaudeArgs)
 }
 finally {
     $spinner.Run = $false
     [Console]::Write("`e[?25h")
+}
+
+if ($settings.keepShellOpen -eq $true) {
+    & (Get-Process -Id $PID).Path -NoLogo
 }
