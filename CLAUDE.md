@@ -10,3 +10,8 @@ runs claude). Settings: `%USERPROFILE%\.claude\launcher\launcher.json` (folder, 
 - Version: `$LauncherVersion` in src/launcher-lib.ps1 + CHANGELOG. Release = push tag `vX.Y.Z` (release.yml publishes
   it; bootstrap.ps1 installs the latest release's source zip).
 - Running install.ps1 on the dev machine replaces the live launcher (same fragment folder); keep a backup if needed.
+- `bundle.ps1` installs the whole set (6 tools). `docs/bundle-section.md` is the canonical "Install the whole set"
+  README block: edit it here, then copy it between the `bundle:start`/`bundle:end` markers of all six READMEs
+  (claude-launcher, claude-taskbar, claude-boxed-messages, claude-statusline, claude-limit-revive, claude-language-spinner).
+- README layout is shared with those repos: badges, hero, pitch, unofficial note, nav, Requirements, Install, Settings,
+  How it looks, Update, How it works, Troubleshooting, Uninstall, Install the whole set, Contributing, License.

@@ -1,7 +1,13 @@
 # Claude Launcher
 
 [![CI](https://github.com/lucaslobasso/claude-launcher/actions/workflows/ci.yml/badge.svg)](https://github.com/lucaslobasso/claude-launcher/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/lucaslobasso/claude-launcher)](https://github.com/lucaslobasso/claude-launcher/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-lightgrey.svg)](#requirements)
+
+<p align="center">
+  <img src="docs/loading.gif" alt="Windows Terminal window titled Claude showing an orange 'Starting Claude' with animated dots" width="760">
+</p>
 
 A one-click **Claude** shortcut for Windows that opens [Claude Code](https://code.claude.com/docs) in Windows Terminal, as if it were its own app:
 
@@ -11,23 +17,9 @@ A one-click **Claude** shortcut for Windows that opens [Claude Code](https://cod
 - **No trust prompt** every time you open it in your chosen folder.
 - **Settings** for the folder it opens in and the Claude command it runs (the agent view by default).
 
-<p align="center">
-  <img src="docs/loading.gif" alt="Windows Terminal window titled Claude showing an orange 'Starting Claude' with animated dots" width="760">
-</p>
+> Unofficial community project, not affiliated with Anthropic.
 
-<p align="center">
-  <img src="docs/taskbar.png" alt="Windows taskbar with a Claude button using the Claude icon" width="344">
-  <br><sub>Claude gets its own taskbar button with the Claude icon, separate from your other terminals.</sub>
-</p>
-
-<p align="center">
-  <img src="docs/agent-view.png" alt="Claude Code agent view running in Windows Terminal (session names blurred)" width="760">
-  <br><sub>A second later: Claude Code's agent view (session names blurred).</sub>
-</p>
-
-> Unofficial. A small personal tool, not made by or affiliated with Anthropic.
-
-**[Install](#install) · [Settings](#settings) · [Update](#update) · [Troubleshooting](#troubleshooting) · [Uninstall](#uninstall)**
+**[Requirements](#requirements) · [Install](#install) · [Settings](#settings) · [How it looks](#how-it-looks) · [Update](#update) · [How it works](#how-it-works) · [Troubleshooting](#troubleshooting) · [Uninstall](#uninstall) · [Install the whole set](#install-the-whole-set)**
 
 ## Requirements
 
@@ -98,7 +90,18 @@ With the one-line install, pass options like this:
 & ([scriptblock]::Create((irm https://raw.githubusercontent.com/lucaslobasso/claude-launcher/main/bootstrap.ps1))) -Folder D:\code
 ```
 
-For one run only, `claude-launch.ps1` takes `-Folder` and `-ClaudeArgs` too. `ClaudeLauncher.exe "<profile>"` opens any Windows Terminal profile with the launcher's taskbar identity.
+For one run only, `claude-launch.ps1` takes `-Folder` and `-ClaudeArgs` too. `ClaudeLauncher.exe "<name>"` opens the launcher's Terminal profile with `<name>` on the taskbar button (the shortcuts pass `-ShortcutName`).
+
+## How it looks
+
+| | |
+| --- | --- |
+| **While Claude starts**: the loading screen | **Its own taskbar button** with the Claude icon |
+| <img src="docs/loading.gif" alt="Orange Starting Claude with animated dots" width="420"> | <img src="docs/taskbar.png" alt="Windows taskbar with a Claude button using the Claude icon" width="300"> |
+
+**`claudeArgs: "agents"`** (default), a second later: Claude Code's agent view (session names blurred). With `claudeArgs: ""` it is a normal Claude Code session instead.
+
+<img src="docs/agent-view.png" alt="Claude Code agent view running in Windows Terminal (session names blurred)" width="760">
 
 ## Update
 
@@ -157,6 +160,42 @@ With the one-line install there's no clone, so uninstall through the same script
 
 This removes the shortcuts (Desktop, Start menu, and taskbar pins that point at the launcher), the Terminal profile and the installed files. It finds a custom `-InstallDir` by itself. Claude Code, its settings and the folder trust entry are not touched.
 
+<!-- bundle:start (copied from claude-launcher/docs/bundle-section.md; edit it there and copy to all six READMEs) -->
+## Install the whole set
+
+This is one of six small tools that work well together. Each installs on its own, or get them all with one command:
+
+| Tool | What it does | Runs on |
+| --- | --- | --- |
+| [Claude Launcher](https://github.com/lucaslobasso/claude-launcher) | One click from the taskbar or Start menu straight into Claude Code, with a Claude icon and a loading spinner | Windows |
+| [Claude Taskbar](https://github.com/lucaslobasso/claude-taskbar) | Your Claude sessions and usage limits as dots and bars on the Windows taskbar | Windows |
+| [boxed-messages](https://github.com/lucaslobasso/claude-boxed-messages) | Colored boxes around your prompts and Claude's replies | Any |
+| [claude-statusline](https://github.com/lucaslobasso/claude-statusline) | A status line with model, context, branch, and usage only when it gets high | Any |
+| [limit-revive](https://github.com/lucaslobasso/claude-limit-revive) | Resumes an unfinished session after the usage limit resets | Any |
+| [language-spinner](https://github.com/lucaslobasso/claude-language-spinner) | The "thinking" spinner shows words in a language you are learning | Any |
+
+**Windows** (PowerShell 7):
+
+```powershell
+irm https://raw.githubusercontent.com/lucaslobasso/claude-launcher/main/bundle.ps1 | iex
+```
+
+To pick, pass options: `-Only statusline,limit-revive`, `-Skip launcher`, `-List` (show what is installed) or `-Uninstall`:
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/lucaslobasso/claude-launcher/main/bundle.ps1))) -Skip taskbar
+```
+
+**macOS and Linux:** the four plugins work everywhere. In a shell:
+
+```sh
+for p in boxed-messages statusline limit-revive language-spinner; do
+  claude plugin marketplace add "lucaslobasso/claude-$p"
+  claude plugin install "$p@claude-$p" --scope user
+done
+```
+<!-- bundle:end -->
+
 ## Contributing
 
 ```powershell
@@ -166,6 +205,8 @@ Invoke-ScriptAnalyzer -Path . -Recurse -Settings PSScriptAnalyzerSettings.psd1
 
 CI runs both and compiles the exe on every push. A tag `v*` publishes a GitHub release, which the one-line install picks up.
 
+`bundle.ps1` (the whole-set installer) lives here too; its tests are in `tests/bundle.Tests.ps1`. The "Install the whole set" section is kept in [`docs/bundle-section.md`](docs/bundle-section.md) and copied into all six READMEs.
+
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) © Lucas Lobasso

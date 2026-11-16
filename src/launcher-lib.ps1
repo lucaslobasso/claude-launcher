@@ -1,7 +1,7 @@
 # launcher-lib.ps1: small helpers shared by claude-launch.ps1 and install.ps1 (and tested in tests/).
 # Installed next to claude-launch.ps1.
 
-$LauncherVersion = '1.1.1'
+$LauncherVersion = '1.2.0'
 
 # The Windows Terminal profile's fixed GUID. Without one, Terminal derives it from the profile name, so renaming
 # (-ShortcutName) made a new profile: per-profile overrides in settings.json stopped applying and anything that

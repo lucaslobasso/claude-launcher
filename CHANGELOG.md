@@ -2,6 +2,18 @@
 
 All notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] - 2026-11-16
+
+### Added
+- `bundle.ps1`: installs the whole set of tools in one line (launcher, Claude Taskbar, and the boxed-messages, statusline, limit-revive and language-spinner plugins), with `-Only`, `-Skip`, `-List` and `-Uninstall`. Plugin commands that drop the `statusLine` entry from `settings.json` get it put back. Pester tests.
+- `docs/bundle-section.md`: the "Install the whole set" README section shared by all six repos.
+
+### Changed
+- README in the layout shared by the set: release and platform badges, a "How it looks" section, the whole-set section.
+
+### Fixed
+- The README said `ClaudeLauncher.exe "<profile>"` opens any Terminal profile; the argument only names the taskbar button.
+
 ## [1.1.1] - 2026-11-15
 
 ### Fixed
@@ -35,5 +47,7 @@ All notable changes to this project. The format follows [Keep a Changelog](https
 ### Added
 - First release: shortcut → `ClaudeLauncher.exe` → Windows Terminal window with its own taskbar identity → orange loading screen → `claude agents`.
 
+[1.2.0]: https://github.com/lucaslobasso/claude-launcher/compare/v1.1.1...v1.2.0
+[1.1.1]: https://github.com/lucaslobasso/claude-launcher/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/lucaslobasso/claude-launcher/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/lucaslobasso/claude-launcher/releases/tag/v1.0.0
