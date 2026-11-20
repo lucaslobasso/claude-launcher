@@ -9,8 +9,8 @@
 #   ... -Uninstall                 remove (combine with -Only / -Skip)
 #
 # Tools: launcher and taskbar (Windows apps, through their own bootstrap.ps1), and the plugins boxed-messages,
-# statusline, limit-revive and language-spinner (through `claude plugin`). Each tool also installs on its own; see
-# its README. The plugins work on macOS and Linux too, with the `claude plugin` commands in their READMEs.
+# statusline, limit-revive, context-handoff, subagentify (the last three from the claude-sessions marketplace) and
+# language-spinner (through `claude plugin`). Each tool also installs on its own; see its README. The plugins work on macOS and Linux too, with the `claude plugin` commands in their READMEs.
 param(
     [string[]]$Only,
     [string[]]$Skip,
@@ -26,6 +26,8 @@ $BundleTools = [ordered]@{
     'boxed-messages'   = @{ Kind = 'plugin'; Repo = 'claude-boxed-messages'; What = 'Colored boxes around messages' }
     'statusline'       = @{ Kind = 'plugin'; Repo = 'claude-statusline'; What = 'Status line, usage only when it gets high'; Needs = 'node' }
     'limit-revive'     = @{ Kind = 'plugin'; Repo = 'claude-sessions'; What = 'Resumes unfinished work after the 5-hour or weekly limit resets' }
+    'context-handoff'  = @{ Kind = 'plugin'; Repo = 'claude-sessions'; What = 'Hands off to a fresh session before the context fills' }
+    'subagentify'      = @{ Kind = 'plugin'; Repo = 'claude-sessions'; What = 'Splits planned work across Opus and Sonnet subagents' }
     'language-spinner' = @{ Kind = 'plugin'; Repo = 'claude-language-spinner'; What = 'Spinner words in a language you are learning' }
 }
 
@@ -113,7 +115,11 @@ function Uninstall-BundlePlugin([string]$Name, $Installed) {
     if (-not ($Installed | Where-Object id -EQ $id)) { return $true }
     if ($Name -eq 'statusline') { Remove-StatuslinePluginEntry }
     $ok = (Invoke-Claude plugin uninstall $id) -eq 0
-    Invoke-Claude plugin marketplace remove $BundleTools[$Name].Repo | Out-Null
+    # Several plugins share a marketplace (claude-sessions): drop it only when none of them is left installed.
+    $market = $BundleTools[$Name].Repo
+    if (-not (Get-InstalledPlugins | Where-Object { "$($_.id)" -like "*@$market" })) {
+        Invoke-Claude plugin marketplace remove $market | Out-Null
+    }
     $ok
 }
 
