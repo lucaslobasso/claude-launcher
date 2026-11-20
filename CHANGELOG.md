@@ -2,6 +2,18 @@
 
 All notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] - 2026-11-20
+
+### Added
+- macOS support. `install.sh` builds `~/Applications/Claude Code.app` locally (icon generated from `assets/claude-launcher.png` with `sips` and `iconutil`, nothing downloaded). Opening it opens a Terminal window (or iTerm, or Ghostty) running `~/.claude/launcher/claude-launch.sh`: the orange "Starting Claude" loading screen, folder trust in `~/.claude.json`, then `claude` with `claudeArgs`.
+- `bootstrap.sh` (one-line install with `curl`, with options and `--uninstall`), `uninstall.sh` (`--keep-settings`), and `install.sh --update`. Options: `--folder`, `--claude-args`, `--keep-shell-open`, `--terminal terminal|iterm|ghostty`, `--name`, `--install-dir`.
+- `terminal` setting in `launcher.json` (macOS only; Windows ignores it). `folder` accepts `~`, `$HOME` and `%USERPROFILE%`.
+- `src/mac/`: bash 3.2 scripts and `json.js` (JSON through `osascript` JXA, no dependencies). shellcheck and bats tests (`tests/mac`), run by CI on `macos-latest`.
+- README, CLAUDE.md and the whole-set section (Claude Launcher now "Windows, macOS") cover macOS.
+
+### Changed
+- Windows is unchanged.
+
 ## [1.2.0] - 2026-11-16
 
 ### Added
@@ -47,6 +59,7 @@ All notable changes to this project. The format follows [Keep a Changelog](https
 ### Added
 - First release: shortcut → `ClaudeLauncher.exe` → Windows Terminal window with its own taskbar identity → orange loading screen → `claude agents`.
 
+[1.3.0]: https://github.com/lucaslobasso/claude-launcher/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/lucaslobasso/claude-launcher/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/lucaslobasso/claude-launcher/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/lucaslobasso/claude-launcher/compare/v1.0.0...v1.1.0
