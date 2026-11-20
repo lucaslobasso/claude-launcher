@@ -171,7 +171,7 @@ This is one of six small tools that work well together. Each installs on its own
 | [Claude Taskbar](https://github.com/lucaslobasso/claude-taskbar) | Your Claude sessions and usage limits as dots and bars on the Windows taskbar | Windows |
 | [boxed-messages](https://github.com/lucaslobasso/claude-boxed-messages) | Colored boxes around your prompts and Claude's replies | Any |
 | [claude-statusline](https://github.com/lucaslobasso/claude-statusline) | A status line with model, context, branch, and usage only when it gets high | Any |
-| [limit-revive](https://github.com/lucaslobasso/claude-sessions) | Resumes an unfinished session after the 5-hour or weekly limit resets (part of claude-sessions, with context-handoff and subagentify) | Any |
+| [claude-sessions](https://github.com/lucaslobasso/claude-sessions) | limit-revive resumes unfinished work after the 5-hour or weekly limit resets, context-handoff continues in a fresh session before the context fills, subagentify splits planned work across Opus and Sonnet subagents | Any |
 | [language-spinner](https://github.com/lucaslobasso/claude-language-spinner) | The "thinking" spinner shows words in a language you are learning | Any |
 
 **Windows** (PowerShell 7):
@@ -186,7 +186,7 @@ To pick, pass options: `-Only statusline,limit-revive`, `-Skip launcher`, `-List
 & ([scriptblock]::Create((irm https://raw.githubusercontent.com/lucaslobasso/claude-launcher/main/bundle.ps1))) -Skip taskbar
 ```
 
-**macOS and Linux:** the four plugins work everywhere. In a shell:
+**macOS and Linux:** the plugins work everywhere. In a shell:
 
 ```sh
 for p in boxed-messages statusline language-spinner; do
@@ -194,7 +194,9 @@ for p in boxed-messages statusline language-spinner; do
   claude plugin install "$p@claude-$p" --scope user
 done
 claude plugin marketplace add lucaslobasso/claude-sessions
-claude plugin install limit-revive@claude-sessions --scope user
+for p in limit-revive context-handoff subagentify; do
+  claude plugin install "$p@claude-sessions" --scope user
+done
 ```
 <!-- bundle:end -->
 
