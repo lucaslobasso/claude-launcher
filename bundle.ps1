@@ -25,7 +25,7 @@ $BundleTools = [ordered]@{
     'taskbar'          = @{ Kind = 'app'; Repo = 'claude-taskbar'; What = 'Sessions and usage on the Windows taskbar' }
     'boxed-messages'   = @{ Kind = 'plugin'; Repo = 'claude-boxed-messages'; What = 'Colored boxes around messages' }
     'statusline'       = @{ Kind = 'plugin'; Repo = 'claude-statusline'; What = 'Status line, usage only when it gets high'; Needs = 'node' }
-    'limit-revive'     = @{ Kind = 'plugin'; Repo = 'claude-limit-revive'; What = 'Resumes unfinished work after the usage limit resets' }
+    'limit-revive'     = @{ Kind = 'plugin'; Repo = 'claude-sessions'; What = 'Resumes unfinished work after the 5-hour or weekly limit resets' }
     'language-spinner' = @{ Kind = 'plugin'; Repo = 'claude-language-spinner'; What = 'Spinner words in a language you are learning' }
 }
 
