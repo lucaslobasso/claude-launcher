@@ -171,7 +171,7 @@ This is one of six small tools that work well together. Each installs on its own
 | [Claude Taskbar](https://github.com/lucaslobasso/claude-taskbar) | Your Claude sessions and usage limits as dots and bars on the Windows taskbar | Windows |
 | [boxed-messages](https://github.com/lucaslobasso/claude-boxed-messages) | Colored boxes around your prompts and Claude's replies | Any |
 | [claude-statusline](https://github.com/lucaslobasso/claude-statusline) | A status line with model, context, branch, and usage only when it gets high | Any |
-| [limit-revive](https://github.com/lucaslobasso/claude-limit-revive) | Resumes an unfinished session after the usage limit resets | Any |
+| [limit-revive](https://github.com/lucaslobasso/claude-sessions) | Resumes an unfinished session after the 5-hour or weekly limit resets (part of claude-sessions, with context-handoff and subagentify) | Any |
 | [language-spinner](https://github.com/lucaslobasso/claude-language-spinner) | The "thinking" spinner shows words in a language you are learning | Any |
 
 **Windows** (PowerShell 7):
@@ -189,10 +189,12 @@ To pick, pass options: `-Only statusline,limit-revive`, `-Skip launcher`, `-List
 **macOS and Linux:** the four plugins work everywhere. In a shell:
 
 ```sh
-for p in boxed-messages statusline limit-revive language-spinner; do
+for p in boxed-messages statusline language-spinner; do
   claude plugin marketplace add "lucaslobasso/claude-$p"
   claude plugin install "$p@claude-$p" --scope user
 done
+claude plugin marketplace add lucaslobasso/claude-sessions
+claude plugin install limit-revive@claude-sessions --scope user
 ```
 <!-- bundle:end -->
 
