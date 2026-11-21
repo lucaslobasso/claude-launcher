@@ -21,7 +21,7 @@ static class ClaudeLauncher
 
     static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     static readonly string SelfExe = Process.GetCurrentProcess().MainModule.FileName;
-    static string IconFile; // claude.exe when found, otherwise this launcher (it has an icon of its own)
+    static string IconFile; // claude.ico next to this exe (installed), else claude.exe, else this launcher (it has an icon of its own)
     const string ProfileGuid = "{4d0d2583-2c71-5809-98e7-a26fa8ae2100}"; // keep in sync with $LauncherProfileGuid in src/launcher-lib.ps1
     static string Profile = "Claude"; // the name shown on the taskbar button
 
@@ -35,7 +35,8 @@ static class ClaudeLauncher
     static int Main(string[] args)
     {
         if (args.Length > 0 && args[0].Trim().Length > 0) Profile = args[0].Trim();
-        IconFile = FindExe(Path.Combine(Home, @".local\bin\claude.exe"), "claude.exe") ?? SelfExe;
+        string ico = Path.Combine(Path.GetDirectoryName(SelfExe), "claude.ico");
+        IconFile = File.Exists(ico) ? ico : (FindExe(Path.Combine(Home, @".local\bin\claude.exe"), "claude.exe") ?? SelfExe);
         log = new Log(Path.Combine(Path.GetDirectoryName(SelfExe), "ClaudeLauncher.log"));
         mainThread = GetCurrentThreadId();
 
