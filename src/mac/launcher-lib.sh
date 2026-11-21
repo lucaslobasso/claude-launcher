@@ -9,7 +9,7 @@
 
 # Keep in sync with $LauncherVersion in src/launcher-lib.ps1 (a test checks it).
 # shellcheck disable=SC2034  # used by the scripts that source this file
-LAUNCHER_VERSION='1.3.0'
+LAUNCHER_VERSION='1.3.1'
 # shellcheck disable=SC2034
 BUNDLE_ID='io.github.lucaslobasso.claude-launcher'
 
