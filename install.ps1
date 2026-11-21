@@ -69,6 +69,8 @@ if (-not $claude) { Write-Warning 'claude was not found (in %USERPROFILE%\.local
 # ---- Files ----
 New-Item -ItemType Directory -Force $InstallDir | Out-Null
 foreach ($f in 'claude-launch.ps1', 'launcher-lib.ps1') { Copy-Item (Join-Path $PSScriptRoot "src\$f") $InstallDir -Force }
+# Claude's icon with the tile grown to fill the frame (claude.exe's own has wide padding and looks small on the taskbar).
+Copy-Item (Join-Path $PSScriptRoot 'assets\claude.ico') $InstallDir -Force
 
 # Settings: keep what a previous install wrote, override with whatever was passed now.
 $settingsFile = Join-Path $InstallDir 'launcher.json'
@@ -88,7 +90,7 @@ $exe = Join-Path $InstallDir 'ClaudeLauncher.exe'
 if ($LASTEXITCODE -ne 0) { throw 'Building ClaudeLauncher.exe failed (see the errors above). Close any running Claude Launcher window and try again.' }
 
 # ---- Windows Terminal profile (a fragment, with a fixed GUID so renaming it keeps it the same profile) ----
-$icon = if ($claude -and $claude -like '*.exe') { $claude } else { $exe }
+$icon = Join-Path $InstallDir 'claude.ico'
 $fragmentDir = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows Terminal\Fragments\ClaudeLauncher'
 New-Item -ItemType Directory -Force $fragmentDir | Out-Null
 $profile_ = [ordered]@{

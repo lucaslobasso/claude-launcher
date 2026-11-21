@@ -2,6 +2,11 @@
 
 All notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.3.1] - 2026-11-21
+
+### Changed
+- Bigger icon on the shortcut, taskbar pin, Terminal profile and window: `assets/claude.ico` is Claude's icon with the tile grown to fill the frame (claude.exe's own has ~8% padding on each side, so it looked smaller than its taskbar neighbours). It no longer depends on finding `claude.exe` at install time.
+
 ## [1.3.0] - 2026-11-20
 
 ### Added

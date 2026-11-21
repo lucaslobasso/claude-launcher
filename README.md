@@ -222,7 +222,7 @@ bash ~/.claude/launcher/claude-launch.sh --demo 5
 - **"Couldn't start Windows Terminal".** Install Windows Terminal, or turn its alias back on: Settings → Apps → Advanced app settings → App execution aliases → **Terminal**.
 - **The installer says scripts are disabled, or "not digitally signed".** Run it with `pwsh -ExecutionPolicy Bypass -File install.ps1`. The installer unblocks its own files after that, and the launch itself always bypasses the policy.
 - **"This script requires PowerShell 7".** You ran it from Windows PowerShell 5.1. Install PowerShell 7, then use `pwsh`.
-- **A generic orange `>_` icon instead of Claude's.** `claude.exe` wasn't found when you installed (for example with an npm install, which has no `.exe`). The launcher works the same way. Re-run the installer after installing Claude Code natively to get Claude's icon.
+- **A generic orange `>_` icon instead of Claude's.** `claude.ico` is missing from the install folder. Re-run the installer.
 - **The window opens as Administrator** (and shows Terminal's icon). The installer handles `"elevate": true` under `profiles.defaults`, so re-run `install.ps1`. If it still happens, check that the launcher's entry in `profiles.list` in your Terminal `settings.json` has `"elevate": false`.
 - **Agent view hangs on "Opening…".** The Claude background service was probably started from an admin terminal, and a non-admin agent view can't talk to it. Close every Claude window and every admin terminal running Claude, then open the shortcut again.
 - **Still the Terminal icon.** Re-pin from the running window (right-click its taskbar button, then Pin to taskbar). Pins made from an old shortcut can keep the old identity.

@@ -44,7 +44,7 @@ foreach ($lnk in @($dirs | ForEach-Object { Get-LauncherShortcuts $_ $exe }) + $
 
 if (Test-Path $fragmentDir) { Remove-Quietly $fragmentDir 'the Windows Terminal profile' }
 
-$files = @('ClaudeLauncher.exe', 'claude-launch.ps1', 'launcher-lib.ps1', 'ClaudeLauncher.log', 'spinner.log')
+$files = @('ClaudeLauncher.exe', 'claude-launch.ps1', 'launcher-lib.ps1', 'claude.ico', 'ClaudeLauncher.log', 'spinner.log')
 if (-not $KeepSettings) { $files += 'launcher.json' }
 foreach ($f in $files) {
     $p = Join-Path $InstallDir $f
