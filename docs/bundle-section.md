@@ -5,7 +5,7 @@ This is one of six small tools that work well together. Each installs on its own
 
 | Tool | What it does | Runs on |
 | --- | --- | --- |
-| [Claude Launcher](https://github.com/lucaslobasso/claude-launcher) | One click from the taskbar or Start menu straight into Claude Code, with a Claude icon and a loading spinner | Windows |
+| [Claude Launcher](https://github.com/lucaslobasso/claude-launcher) | One click from the taskbar or Start menu straight into Claude Code, with a Claude icon and a loading spinner | Windows, macOS |
 | [Claude Taskbar](https://github.com/lucaslobasso/claude-taskbar) | Your Claude sessions and usage limits as dots and bars on the Windows taskbar | Windows |
 | [boxed-messages](https://github.com/lucaslobasso/claude-boxed-messages) | Colored boxes around your prompts and Claude's replies | Any |
 | [claude-statusline](https://github.com/lucaslobasso/claude-statusline) | A status line with model, context, branch, and usage only when it gets high | Any |
@@ -24,7 +24,13 @@ To pick, pass options: `-Only statusline,limit-revive`, `-Skip launcher`, `-List
 & ([scriptblock]::Create((irm https://raw.githubusercontent.com/lucaslobasso/claude-launcher/main/bundle.ps1))) -Skip taskbar
 ```
 
-**macOS and Linux:** the plugins work everywhere. In a shell:
+**macOS and Linux:** the plugins work everywhere. On macOS the launcher installs with its own one-liner:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/lucaslobasso/claude-launcher/main/bootstrap.sh | bash
+```
+
+The plugins, in a shell:
 
 ```sh
 for p in boxed-messages statusline language-spinner; do

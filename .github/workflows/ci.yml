@@ -28,3 +28,14 @@ jobs:
           & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" -nologo -target:winexe -platform:anycpu `
             -win32icon:assets\claude-launcher.ico -out:ClaudeLauncher.exe src\ClaudeLauncher.cs
           if ($LASTEXITCODE -ne 0) { exit 1 }
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install bats and shellcheck
+        run: brew install bats-core shellcheck
+      - name: ShellCheck
+        run: shellcheck -x install.sh uninstall.sh bootstrap.sh src/mac/*.sh
+      - name: Tests (bats)
+        run: bats tests/mac

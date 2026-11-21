@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Template for <Name>.app/Contents/Info.plist; install.sh fills in the @@...@@ values (XML-escaped). -->
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>@@NAME@@</string>
+	<key>CFBundleDisplayName</key>
+	<string>@@NAME@@</string>
+	<key>CFBundleIdentifier</key>
+	<string>@@BUNDLE_ID@@</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@@VERSION@@</string>
+	<key>CFBundleVersion</key>
+	<string>@@VERSION@@</string>
+	<key>CFBundleExecutable</key>
+	<string>claude-launcher</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>11.0</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>ClaudeLauncherInstallDir</key>
+	<string>@@INSTALL_DIR@@</string>
+</dict>
+</plist>
